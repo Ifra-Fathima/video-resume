@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Signup</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #f0f0f0;
+    }
+
+    form {
+      background: white;
+      padding: 20px;
+      margin: 50px auto;
+      width: 300px;
+      border-radius: 8px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      margin: 8px 0;
+      padding: 8px;
+    }
+
+    button {
+      background: #333;
+      color: white;
+      padding: 10px;
+      border: none;
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <form id="signupForm">
+    <h2>Signup</h2>
+    <input type="email" name="email" placeholder="Email" required id="email" />
+    <input type="password" name="password" placeholder="Password" required id="password" />
+    <select name="userType" id="userType">
+      <option value="recruiter">Recruiter</option>
+      <option value="jobseeker">Job Seeker</option>
+    </select>
+    <button type="submit">Sign Up</button>
+    <p id="msg"></p>
+  </form>
+  <script>
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const userType = document.getElementById('userType').value;
+      const backendURL = 'http://localhost:5000'; // Change this to your backend
+
+
+      try {
+        const res = await fetch(`${backendURL}/api/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, userType })
+      });
+
+        const data = await res.json();
+
+        if (data.success) {
+          alert('Signup successful! Please verify your email.');
+          window.location.href = '/client/login.html';
+        } else {
+          alert('Signup failed: ' + data.message);
+        }
+      } catch (err) {
+        console.error('Error:', err);
+        alert('Something went wrong.');
+      }
+    });
+
+     const socket = new WebSocket('ws://localhost:5000');
+    socket.addEventListener('open', () => console.log('Connected to WebSocket'));
+    socket.addEventListener('message', (event) => console.log('Message from server:', event.data));
+
+  </script>
+</body>
+
+</html>

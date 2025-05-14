@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Job Seeker Dashboard</title>
+  <style>
+    body { font-family: Arial; background: #f9f9f9; }
+    #results img { width: 200px; margin: 10px; }
+    input { padding: 8px; width: 200px; }
+    button { padding: 8px; }
+  </style>
+</head>
+<body>
+  <h1 style="text-align:center">Job Seeker Dashboard</h1>
+  <input type="text" id="searchTag" placeholder="Search hashtag" />
+  <button onclick="searchJobs()">Search</button>
+  <div id="results"></div>
+
+  <script>
+    async function searchJobs() {
+      const tag = document.getElementById('searchTag').value;
+      const res = await fetch(`/api/jobs/search?hashtag=${tag}`);
+      const jobs = await res.json();
+      const div = document.getElementById('results');
+      div.innerHTML = jobs.map(j => `<div><img src="${j.mediaUrl}"><h3>${j.title}</h3><p>${j.description}</p></div>`).join('');
+    }
+  </script>
+</body>
+</html>

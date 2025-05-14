@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <style>
+    body { font-family: Arial; background: #f0f0f0; }
+    form { background: white; padding: 20px; margin: 50px auto; width: 300px; border-radius: 8px; }
+    input { width: 100%; margin: 8px 0; padding: 8px; }
+    button { background: #333; color: white; padding: 10px; border: none; width: 100%; }
+  </style>
+</head>
+<body>
+  <form id="loginForm">
+    <h2>Login</h2>
+    <input type="email" name="email" placeholder="Email" required id="email" />
+    <input type="password" name="password" placeholder="Password" required id="password" />
+    <button type="submit">Login</button>
+    <p id="msg"></p>
+  </form>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const backendURL = 'http://localhost:5000';
+
+      if (!email || !password) {
+        alert('Please enter both email and password.');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${backendURL}/api/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          alert(errorData.message || 'Login failed.');
+          return;
+        }
+
+        const data = await res.json();
+
+        if (res.ok) {
+          if (data.userType === 'recruiter') {
+            window.location.href = `/client/recruiter-dashboard.html?userId=${data.userId}`;
+          } else if (data.userType === 'jobseeker') {
+            window.location.href = `/client/jobseeker-dashboard.html?userId=${data.userId}`;
+          } else {
+            alert('Unknown user type.');
+          }
+        } else {
+          alert(data.message || 'Login failed.');
+        }
+      } catch (err) {
+        console.error('Error:', err);
+        alert('Something went wrong. Please check your backend server.');
+      }
+    });
+  </script>
+</body>
+</html>
