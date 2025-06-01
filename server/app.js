@@ -11,17 +11,22 @@ const WebSocket = require('ws');
 const authRoutes = require('./routes/authRoutes');
 const jobRoutes = require('./routes/jobRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const recruiterRoutes = require('./routes/recruiterRoutes');
+
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*' } });
 const wss = new WebSocket.Server({ server });
 
-// app.use(express.static(path.join(__dirname, 'client')));
+const bodyParser = require('body-parser');
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
 app.use(cors());
 app.use(express.json());
 app.use(fileUpload());
-app.use('/uploads', express.static('uploads'));
+app.use('./uploads', express.static('uploads'));
 
 
 mongoose.connect(process.env.MONGODB_URI, {
@@ -51,8 +56,11 @@ io.on('connection', (socket) => {
   });
 });
 
+
+
+
 app.use('/api/auth', authRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/chat', chatRoutes);
-
+app.use('/api/recruiters', recruiterRoutes);
 server.listen(process.env.PORT, () => console.log(`Server running on port ${process.env.PORT}`));

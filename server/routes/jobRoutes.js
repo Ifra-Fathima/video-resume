@@ -1,32 +1,44 @@
 const express = require('express');
+const multer = require('multer');
 const Job = require('../models/Job');
-const { uploadFile } = require('../utils/s3');
 
 const router = express.Router();
 
-// Recruiter posting a job
-router.post('/post', async (req, res) => {
-  const { recruiterId, title, description, hashtags } = req.body;
-  const mediaFile = req.files?.media;
+// Multer config
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
-  const uploadResult = await uploadFile(mediaFile.tempFilePath, mediaFile.name);
+// POST /api/jobs/post
+router.post('/post', upload.single('media'), async (req, res) => {
+  try {
+    const {
+      recruiterId, title, company, description,
+      experience, eligibility, package: salary,
+      deadline, hashtags
+    } = req.body;
 
-  const job = await Job.create({
-    recruiterId,
-    title,
-    description,
-    hashtags: hashtags.split(','),
-    mediaUrl: uploadResult.Location,
-  });
+    const newJob = new Job({
+      recruiterId,
+      title,
+      company,
+      description,
+      experience,
+      eligibility,
+      salary,
+      deadline,
+      hashtags: hashtags.split(',').map(h => h.trim()),
+      media: req.file ? {
+        data: req.file.buffer,
+        contentType: req.file.mimetype
+      } : null
+    });
 
-  res.json(job);
-});
-
-// Search jobs by hashtag
-router.get('/search', async (req, res) => {
-  const { hashtag } = req.query;
-  const jobs = await Job.find({ hashtags: hashtag });
-  res.json(jobs);
+    await newJob.save();
+    res.status(201).json({ message: 'Job posted successfully' });
+  } catch (err) {
+    console.error('Error posting job:', err);
+    res.status(500).json({ error: 'Failed to post job' });
+  }
 });
 
 module.exports = router;

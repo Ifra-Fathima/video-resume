@@ -1,12 +1,20 @@
+// models/Job.js
 const mongoose = require('mongoose');
 
 const jobSchema = new mongoose.Schema({
-  recruiterId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  recruiterId: { type: mongoose.Schema.Types.ObjectId, ref: 'Recruiter', required: true },
   title: String,
+  company: String,
   description: String,
+  experience: String,
+  eligibility: String,
+  package: String,
+  deadline: Date,
   hashtags: [String],
-  mediaUrl: String,
-  createdAt: { type: Date, default: Date.now },
-});
+  media: {
+    data: Buffer,
+    contentType: String
+  },
+}, { timestamps: true });
 
 module.exports = mongoose.model('Job', jobSchema);
